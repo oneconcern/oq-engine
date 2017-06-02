@@ -162,7 +162,7 @@ class EventBasedRiskTestCase(CalculatorTestCase):
         grp00 = self.calc.datastore.get_attr('ruptures/grp-00', 'nbytes')
         grp02 = self.calc.datastore.get_attr('ruptures/grp-02', 'nbytes')
         grp03 = self.calc.datastore.get_attr('ruptures/grp-03', 'nbytes')
-        self.assertEqual(grp00, 545)
+        self.assertEqual(grp00, 654)
         self.assertEqual(grp02, 545)
         self.assertEqual(grp03, 218)
 

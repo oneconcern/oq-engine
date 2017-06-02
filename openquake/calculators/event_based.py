@@ -27,7 +27,6 @@ import numpy
 from openquake.baselib import hdf5
 from openquake.baselib.python3compat import zip
 from openquake.baselib.general import AccumDict, block_splitter, humansize
-from openquake.hazardlib.calc.filters import FarAwayRupture
 from openquake.hazardlib.probability_map import ProbabilityMap
 from openquake.hazardlib.stats import compute_pmap_stats
 from openquake.hazardlib.geo.surface import PlanarSurface
@@ -169,13 +168,6 @@ def _build_eb_ruptures(
     yield pairs (rupture, <list of associated EBRuptures>)
     """
     for rup in sorted(num_occ_by_rup, key=operator.attrgetter('rup_no')):
-        with rup_mon:
-            try:
-                r_sites, dists = idist.get_closest(s_sites, rup)
-            except FarAwayRupture:
-                # ignore ruptures which are far away
-                del num_occ_by_rup[rup]  # save memory
-                continue
 
         # creating EBRuptures
         serial = rup.seed - random_seed + 1
@@ -188,8 +180,7 @@ def _build_eb_ruptures(
                 events.append((0, ses_idx, sampleid))
         if events:
             yield calc.EBRupture(
-                rup, r_sites.indices,
-                numpy.array(events, calc.event_dt),
+                rup, s_sites.indices, numpy.array(events, calc.event_dt),
                 src.src_group_id, serial)
 
 

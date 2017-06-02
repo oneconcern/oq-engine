@@ -25,6 +25,7 @@ from openquake.baselib import hdf5
 from openquake.baselib.python3compat import zip, decode
 from openquake.baselib.general import groupby, get_array, AccumDict
 from openquake.hazardlib import site, calc, valid
+from openquake.hazardlib.calc.filters import FarAwayRupture
 from openquake.risklib import scientific, riskmodels
 
 
@@ -570,9 +571,13 @@ class GmfGetter(object):
         for ebr in self.ebruptures:
             sites = site.FilteredSiteCollection(
                 ebr.sids, self.sitecol.complete)
-            computer = calc.gmf.GmfComputer(
-                ebr, sites, self.imts, gsims,
-                self.truncation_level, self.correlation_model)
+            try:
+                computer = calc.gmf.GmfComputer(
+                    ebr, sites, self.imts, gsims,
+                    self.truncation_level, self.correlation_model)
+            except FarAwayRupture:
+                # ignore ruptures which are far away
+                continue
             self.computers.append(computer)
         # dictionary rlzi -> array(imts, events, nbytes)
         self.gmdata = AccumDict(accum=numpy.zeros(len(self.imts) + 2, F32))
