@@ -478,7 +478,7 @@ def get_calcs(db, request_get_dict, user_name, user_acl_on=False, id=None):
         # assume an ISO date string
         time_filter = "start_time >= '%s'" % request_get_dict.get('start_time')
     else:
-        time_filter = 1
+        time_filter = 100
 
     jobs = db('SELECT * FROM job WHERE ?A AND %s ORDER BY id DESC LIMIT %d'
               % (time_filter, limit), filterdict)
