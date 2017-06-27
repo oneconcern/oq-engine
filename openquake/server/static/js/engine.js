@@ -402,9 +402,14 @@
     function closeTimer() {
         refresh_calcs = clearInterval(refresh_calcs);
     }
+    
+
 
     /* classic event management */
     $(document).ready(
+
+        
+
         function() {
             calculation_table = new CalculationTable({ calculations: calculations });
             calculations.fetch({reset: true});
