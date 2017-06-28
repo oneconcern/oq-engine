@@ -482,7 +482,7 @@ def get_calcs(db, request_get_dict, user_name, user_acl_on=False, id=None):
 
     # jobs = db('SELECT * FROM job WHERE ?A AND %s ORDER BY id DESC LIMIT %d'
     #          % (time_filter, limit), filterdict)
-    jobs = db('SELECT * FROM job WHERE ?A AND %s ORDER BY id'
+    jobs = db('SELECT * FROM job WHERE ?A AND %s ORDER BY id DESC'
               % (time_filter), filterdict)   
     return [(job.id, job.user_name, job.status, job.calculation_mode,
              job.is_running, job.description) for job in jobs]

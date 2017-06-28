@@ -407,7 +407,6 @@
 
     /* classic event management */
     $(document).ready(
-
         
 
         function() {

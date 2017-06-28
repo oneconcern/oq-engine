@@ -102,12 +102,12 @@
       </tbody>
     </table>
     <div id="pagination"></div>
-  <script>
+        <script>
             jQuery(function($) {
                 var items = $("#calculation_table tbody tr");
 
                 var numItems = items.length;
-                var perPage = 20;
+                var perPage = 10;
 
                 // Only show the first 2 (or first `per_page`) items initially.
                 items.slice(perPage).hide();
@@ -117,6 +117,7 @@
                     items: numItems,
                     itemsOnPage: perPage,
                     cssStyle: "light-theme",
+                    currentPage: 1, 
 
                     // This is the actual page changing functionality.
                     onPageClick: function(pageNumber) {
@@ -130,8 +131,33 @@
                              .slice(showFrom, showTo).show();
                     }
                 });
-            });
-        </script>
+                // EDIT: Let's cover URL fragments (i.e. #page-3 in the URL).
+                // More thoroughly explained (including the regular expression) in: 
+                // We'll create a function to check the URL fragment
+                // and trigger a change of page accordingly.
+            function checkFragment() {
+                // If there's no hash, treat it like page 1.
+                var hash = window.location.hash || "#page-1";
+
+                // We'll use a regular expression to check the hash string.
+                hash = hash.match(/^#page-(\d+)$/);
+
+                if(hash) {
+                    // The `selectPage` function is described in the documentation.
+                    // We've captured the page number in a regex group: `(\d+)`.
+                    $("#pagination").pagination("selectPage", parseInt(hash[1]));
+                }
+            };
+
+         // We'll call this function whenever back/forward is pressed...
+         $(window).bind("popstate", checkFragment);
+
+        // ... and we'll also call it when the page has loaded
+        // (which is right now).
+        checkFragment();
+
+        });
+            </script>
   </script>
   {% endblock templates %}
 
