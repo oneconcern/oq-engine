@@ -872,10 +872,13 @@ class UCERFRiskCalculator(EbriskCalculator):
         elt_dt = numpy.dtype([('eid', U64), ('loss', (F32, (self.L, self.I)))])
         monitor = self.monitor('compute_losses')
         for sm in self.csm.source_models:
-            ssm = self.csm.get_model(sm.ordinal)
+            ssm = [sm] = self.csm.get_model(sm.ordinal)
+            for sg in sm.src_groups:
+                for src in sg.sources:
+                    src.samples = 1
             for ses_idx in range(1, oq.ses_per_logic_tree_path + 1):
                 param = dict(ses_seeds=[(ses_idx, oq.ses_seed + ses_idx)],
-                             samples=1, assetcol=self.assetcol,
+                             assetcol=self.assetcol,
                              save_ruptures=False,
                              ses_ratio=oq.ses_ratio,
                              avg_losses=oq.avg_losses,
