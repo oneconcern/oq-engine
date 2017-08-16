@@ -346,9 +346,11 @@ class PSHACalculator(base.HazardCalculator):
                     imtls=oq.imtls,
                     maximum_distance=oq.maximum_distance,
                     disagg=oq.poes_disagg or oq.iml_disagg,
-                    samples=sm.samples, seed=oq.ses_seed,
+                    seed=oq.ses_seed,
                     ses_per_logic_tree_path=oq.ses_per_logic_tree_path)
                 for sg in sm.src_groups:
+                    for src in sg.sources:
+                        src.samples = sm.samples
                     if num_tiles <= 1:
                         logging.info(
                             'Sending source group #%d of %d (%s, %d sources)',

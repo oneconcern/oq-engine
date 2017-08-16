@@ -693,7 +693,7 @@ def compute_ruptures(sources, src_filter, gsims, param, monitor):
     background_sids = src.get_background_sids(src_filter)
     sitecol = src_filter.sitecol
     idist = src_filter.integration_distance
-    for sample in range(param['samples']):
+    for sample in range(src.samples):
         for ses_idx, ses_seed in param['ses_seeds']:
             seed = sample * event_based.TWO16 + ses_seed
             with sampl_mon:
@@ -790,9 +790,10 @@ class UCERFRuptureCalculator(event_based.EventBasedRuptureCalculator):
             srcs = ssm.get_sources()
             for src in srcs:
                 src.nsites = len(self.sitecol)  # not filtered here
+                src.samples = sm.samples
             for ses_idx in range(1, oq.ses_per_logic_tree_path + 1):
                 ses_seeds = [(ses_idx, oq.ses_seed + ses_idx)]
-                param = dict(ses_seeds=ses_seeds, samples=sm.samples,
+                param = dict(ses_seeds=ses_seeds,
                              save_ruptures=oq.save_ruptures)
                 allargs.append((srcs, self.src_filter, gsims, param, monitor))
         return allargs

@@ -726,6 +726,7 @@ def split_filter_source(src, src_filter):
                 'Splitting %s "%s" in %d sources', src.__class__.__name__,
                 src.source_id, len(splits))
     for split in splits:
+        split.samples = src.samples
         if has_serial:
             nr = split.num_ruptures
             split.serial = src.serial[start:start + nr]
