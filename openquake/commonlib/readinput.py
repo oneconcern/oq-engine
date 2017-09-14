@@ -844,8 +844,12 @@ def get_gmfs(oqparam):
         assert num_gmv == I, (num_gmv, I)
         dtlist.append(('gmv', (F32, num_gmv)))
         eids = numpy.unique(array['eid'])
-        assert len(eids) == oqparam.number_of_ground_motion_fields, (
-            len(eids), oqparam.number_of_ground_motion_fields)
+        if (oqparam.number_of_ground_motion_fields and
+                len(eids) != oqparam.number_of_ground_motion_fields):
+            raise ValueError(
+                'number_of_ground_motion_fields=%d is different from the '
+                'number of events in the GMFs file, %d' %
+                (len(eids), oqparam.number_of_ground_motion_fields))
         eidx = {eid: e for e, eid in enumerate(eids)}
         sids = numpy.unique(array['sid'])
         gmfs = numpy.zeros((R, len(sids), len(eids), I), F32)

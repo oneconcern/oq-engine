@@ -46,14 +46,14 @@ class GmfEbRiskCalculator(base.RiskCalculator):
         self.L = len(self.riskmodel.lti)
         self.T = len(self.assetcol.taxonomies)
         self.A = len(self.assetcol)
-        self.E = oq.number_of_ground_motion_fields
         self.I = oq.insured_losses + 1
+        eids, gmfs = calc.get_gmfs(self.datastore, self.precalc)
+        self.E = len(eids)
+        self.R = len(gmfs)
         if oq.ignore_covs:
             eps = numpy.zeros((self.A, self.E), numpy.float32)
         else:
             eps = self.make_eps(self.E)
-        eids, gmfs = calc.get_gmfs(self.datastore, self.precalc)
-        self.R = len(gmfs)
         self.riskinputs = self.build_riskinputs('gmf', gmfs, eps, eids)
         self.param['assetcol'] = self.assetcol
         self.param['insured_losses'] = oq.insured_losses
@@ -71,8 +71,7 @@ class GmfEbRiskCalculator(base.RiskCalculator):
             self.dset = self.datastore.create_dset(
                 'avg_losses-rlzs', F32, (self.A, self.R, self.L * self.I))
 
-        events = numpy.zeros(oq.number_of_ground_motion_fields,
-                             calc.stored_event_dt)
+        events = numpy.zeros(len(eids), calc.stored_event_dt)
         events['eid'] = eids
         self.datastore['events/grp-00'] = events
 

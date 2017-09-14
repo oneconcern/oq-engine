@@ -408,12 +408,13 @@ def get_gmfs(dstore, precalc=None):
     N = len(haz_sitecol.complete)
     I = len(oq.imtls)
     E = oq.number_of_ground_motion_fields
-    eids = numpy.arange(E)
-    gmfs = numpy.zeros((num_assocs, N, E, I))
-    if precalc:
-        for g, gsim in enumerate(precalc.gsims):
-            gmfs[g, sitecol.sids] = precalc.gmfa[gsim]
-        return eids, gmfs
+    if E:
+        eids = numpy.arange(E)
+        gmfs = numpy.zeros((num_assocs, N, E, I))
+        if precalc:
+            for g, gsim in enumerate(precalc.gsims):
+                gmfs[g, sitecol.sids] = precalc.gmfa[gsim]
+            return eids, gmfs
 
     if 'gmf_data/data' in dstore:
         dset = dstore['gmf_data/data']
