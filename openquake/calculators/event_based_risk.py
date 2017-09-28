@@ -473,6 +473,10 @@ class EbriskCalculator(base.RiskCalculator):
             for rlzname in self.datastore['agg_loss_table']:
                 self.datastore.set_nbytes('agg_loss_table/' + rlzname)
             self.datastore.set_nbytes('agg_loss_table')
+            eids = numpy.concatenate([self.datastore['events/' + grp]['eid']
+                                      for grp in self.datastore['events']])
+            eids.sort()  # store the event IDs
+            self.datastore.set_attrs('agg_loss_table', eids=eids)
             E = sum(num_events.values())
             agglt = self.datastore['agg_loss_table']
             for rlz, dset in agglt.items():
