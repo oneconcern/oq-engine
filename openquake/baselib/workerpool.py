@@ -37,10 +37,13 @@ def _starmap(func, iterargs, host, task_in_port, receiver_ports):
                 sender.send((func, args))
                 n += 1
         yield n
-        for _ in range(n):
-            obj = receiver.zsocket.recv_pyobj()
+        while n:
             # receive n responses for the n requests sent
-            yield obj
+            num_events = receiver.zsocket.poll(10)
+            if num_events:
+                for _ in range(num_events):
+                    yield receiver.zsocket.recv_pyobj()
+                n -= num_events
 
 
 class WorkerMaster(object):
