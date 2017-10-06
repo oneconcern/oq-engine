@@ -79,16 +79,15 @@ class DbServer(object):
         logging.warn('DB server started with %s on %s, pid=%d',
                      sys.executable, self.frontend, self.pid)
         if ZMQ:
-        # start task_in->task_out streamer thread
-        c = config.zworkers
-        threading.Thread(
-            target=w.streamer,
-            args=(self.master_host, c.task_in_port, c.task_out_port)
-        ).start()
-        logging.warn('Task streamer started from %s -> %s',
-                     c.task_in_port, c.task_out_port)
+            # start task_in->task_out streamer thread
+            c = config.zworkers
+            threading.Thread(
+                target=w.streamer,
+                args=(self.master_host, c.task_in_port, c.task_out_port)
+            ).start()
+            logging.warn('Task streamer started from %s -> %s',
+                         c.task_in_port, c.task_out_port)
 
-        if os.environ.get('OQ_DISTRIBUTE') == 'zmq':
             # start zworkers and wait a bit for them
             msg = self.master.start()
             logging.warn(msg)
