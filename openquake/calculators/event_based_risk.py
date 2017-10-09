@@ -135,7 +135,7 @@ def event_based_risk(riskinput, riskmodel, param, monitor):
     E = len(eids)
     I = param['insured_losses'] + 1
     L = len(riskmodel.lti)
-    tagmask = assetcol.tagmask()
+    tagmask = assetcol.tagmask(param['aggregate_by'])
     A, T = tagmask.shape
     R = riskinput.hazard_getter.num_rlzs
     param['lrs_dt'] = numpy.dtype([('rlzi', U16), ('ratios', (F32, (L * I,)))])
@@ -300,6 +300,7 @@ class EbriskCalculator(base.RiskCalculator):
         mon = self.monitor('risk')
         for sm in csm_info.source_models:
             param = dict(
+                aggregate_by=oq.aggregate_by,
                 assetcol=self.assetcol,
                 ses_ratio=oq.ses_ratio,
                 loss_dt=oq.loss_dt(), elt_dt=elt_dt,
@@ -363,8 +364,8 @@ class EbriskCalculator(base.RiskCalculator):
         oq = self.oqparam
         self.R = num_rlzs
         self.A = len(self.assetcol)
-        self.tagmask = self.assetcol.tagmask()  # shape (A, T)
-        tags = encode(self.assetcol.tags())
+        self.tagmask = self.assetcol.tagmask(*oq.aggregate_by)  # shape (A, T)
+        tags = encode(self.assetcol.tags(*oq.aggregate_by))
         T = len(tags)
         self.datastore.create_dset('losses_by_tag-rlzs', F32,
                                    (T, self.R, self.L * self.I))

@@ -35,7 +35,7 @@ from openquake.baselib import hdf5
 from openquake.hazardlib import (
     geo, site, imt, valid, sourceconverter, nrml, InvalidFile)
 from openquake.hazardlib.calc.hazard_curve import zero_curves
-from openquake.risklib import asset, riskmodels, riskinput, read_nrml
+from openquake.risklib import asset, riskinput, read_nrml
 from openquake.baselib import datastore
 from openquake.commonlib.oqvalidation import OqParam
 from openquake.commonlib import logictree, source, writers
@@ -659,7 +659,12 @@ def get_exposure(oqparam):
     relevant_cost_types = all_cost_types - set(['occupants'])
     asset_refs = set()
     ignore_missing_costs = set(oqparam.ignore_missing_costs)
-
+    assets_by_tag = exposure.assets_by_tag
+    valid_tagnames = set(['taxonomy'] + list(assets_by_tag.tagnames))
+    for tagname in oqparam.aggregate_by:
+        if tagname != 'taxonomy' and tagname not in valid_tagnames:
+            raise ValueError('aggregate_by=%s is invalid, valid tag names are '
+                             '%s' % (tagname, valid_tagnames))
     for idx, asset_node in enumerate(assets_node):
         values = {}
         deductibles = {}
@@ -692,7 +697,6 @@ def get_exposure(oqparam):
                 out_of_region += 1
                 continue
             tagnode = getattr(asset_node, 'tags', None)
-            assets_by_tag = exposure.assets_by_tag
             if tagnode is not None:
                 for tagname, tagvalue in tagnode.attrib.items():
                     if tagname not in assets_by_tag.tagnames:

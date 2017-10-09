@@ -275,11 +275,22 @@ class AssetCollection(object):
                         self._taxonomy[aid] = value
         return self._taxonomy
 
-    def tags(self):
+    def tags(self, *tagnames):
         """
-        :returns: list of sorted tags
+        :param tagnames:
+             tag names used for the aggregation
+        :returns:
+             sorted list of tags with the given tag names
+             (the full list if no tag names are given)
         """
-        return sorted(self.aids_by_tag)
+        if not tagnames:
+            return sorted(self.aids_by_tag)
+        out = []
+        for tag in sorted(self.aids_by_tag):
+            tagname, _tagvalue = tag.split('=', 1)
+            if tagname == 'taxonomy' or tagname in tagnames:
+                out.append(tag)
+        return out
 
     def units(self, loss_types):
         """
@@ -318,15 +329,16 @@ class AssetCollection(object):
                 vals[i][lt] = asset.value(lt, self.time_event)
         return vals
 
-    def tagmask(self):
+    def tagmask(self, *tagnames):
         """
+        :param tagnames: tag names used for the aggregation
         :returns: array of booleans of shape (A, T)
         """
-        tags = self.tags()
+        tags = self.tags(*tagnames)
         tagidx = {t: i for i, t in enumerate(tags)}
         mask = numpy.zeros((len(self), len(tags)), bool)
-        for tag, aids in self.aids_by_tag.items():
-            mask[aids, tagidx[tag]] = True
+        for tag in tags:
+            mask[self.aids_by_tag[tag], tagidx[tag]] = True
         return mask
 
     def get_tax_idx(self):
