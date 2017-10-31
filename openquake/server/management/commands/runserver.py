@@ -8,6 +8,7 @@ from openquake.server import sub_job_manager
 
 class Command(BaseRunserverCommand):
     def __init__(self, *args, **kwargs):
+        print("Custom runserver")
         atexit.register(self._exit)
         signal.signal(signal.SIGINT, self._handle_SIGINT)
         sub_job_manager.start_sub_job_manager()

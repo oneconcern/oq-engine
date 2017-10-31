@@ -19,6 +19,7 @@
 from django.conf import settings
 from django.conf.urls import url, include
 from django.views.generic.base import RedirectView
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from openquake.server import views
 
@@ -55,3 +56,6 @@ if settings.LOCKDOWN:
         url(r'^accounts/ajax_login/$', views.ajax_login),
         url(r'^accounts/ajax_logout/$', views.ajax_logout),
     ]
+
+if settings.DEBUG is True:
+    urlpatterns += staticfiles_urlpatterns()
