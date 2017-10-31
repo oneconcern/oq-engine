@@ -117,8 +117,8 @@ AUTH_EXEMPT_URLS = ()
 ROOT_URLCONF = 'openquake.server.urls'
 
 INSTALLED_APPS += (
-    'django.contrib.staticfiles',
     'openquake.server',
+    'django.contrib.staticfiles',
 )
 
 # A sample logging configuration. The only tangible logging
