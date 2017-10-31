@@ -25,7 +25,7 @@ import sys
 import inspect
 import tempfile
 import subprocess
-import thread
+import threading
 import time
 try:
     import urllib.parse as urlparse
@@ -460,7 +460,7 @@ engine.run_calc({job_id}, oqparam, 'info', os.devnull, '', {hazard_job_id})
 
 # probably locking around would be a good idea
 _submitted_jobs = []
-_submitted_job_manager = False
+_submitted_job_manager = None
 _submitted_job_manager_st = True
 
 
@@ -493,9 +493,9 @@ def submit_job(job_ini, user_name, hazard_job_id=None):
     runcalc = RUNCALC.format(job_ini=job_ini, job_id=job_id,
                              hazard_job_id=hazard_job_id, testmode=testmode)
     devnull = getattr(subprocess, 'DEVNULL', None)  # defined in Python 3
-    if _submitted_job_manager is False:
-        thread.start_new_thread(submitted_job_manager, ())
-        _submitted_job_manager = True
+    if _submitted_job_manager is None:
+        _submitted_job_manager = threading.Thread(target=submitted_job_manager)
+        _submitted_job_manager.start()
     popen = subprocess.Popen([sys.executable, '-c', runcalc],
                              stdin=devnull, stdout=devnull, stderr=devnull)
     submitted_job_append(popen)
