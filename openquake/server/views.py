@@ -25,6 +25,8 @@ import sys
 import inspect
 import tempfile
 import subprocess
+import thread
+import time
 try:
     import urllib.parse as urlparse
 except ImportError:
@@ -456,19 +458,48 @@ if {testmode}:  # bypass dbserver
 engine.run_calc({job_id}, oqparam, 'info', os.devnull, '', {hazard_job_id})
 '''
 
+# probably locking around would be a good idea
+_submitted_jobs = []
+_submitted_job_manager = False
+_submitted_job_manager_st = True
+
+
+def submitted_job_manager():
+    global _submitted_jobs
+    global _submitted_job_manager
+
+    while _submitted_job_manager_st is True:
+        for i, sub in enumerate(_submitted_jobs):
+            if sub.poll() is not None:
+                # here return value
+                del _submitted_jobs[i]
+        time.sleep(0.25)
+    _submitted_job_manager = False
+
+
+def submitted_job_append(popen):
+    _submitted_jobs.append(popen)
+
 
 def submit_job(job_ini, user_name, hazard_job_id=None):
     """
     Create a job object from the given job.ini file in the job directory
     and run it in a new process. Returns the job ID and PID.
     """
+    global _submitted_job_manager
+
     testmode = int(logs.dbcmd.__name__ == 'fakedbcmd')  # bypass dbserver
     job_id, _oq = engine.job_from_file(job_ini, user_name, hazard_job_id)
     runcalc = RUNCALC.format(job_ini=job_ini, job_id=job_id,
                              hazard_job_id=hazard_job_id, testmode=testmode)
     devnull = getattr(subprocess, 'DEVNULL', None)  # defined in Python 3
+    if _submitted_job_manager is False:
+        thread.start_new_thread(submitted_job_manager, ())
+        _submitted_job_manager = True
     popen = subprocess.Popen([sys.executable, '-c', runcalc],
                              stdin=devnull, stdout=devnull, stderr=devnull)
+    submitted_job_append(popen)
+
     return job_id, popen.pid
 
 
