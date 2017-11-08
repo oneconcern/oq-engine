@@ -18,10 +18,11 @@
 
 import shutil
 import json
-import signal
 import logging
 import os
 import sys
+import atexit
+import signal
 import inspect
 import tempfile
 import subprocess
@@ -97,6 +98,16 @@ ACCESS_HEADERS = {'Access-Control-Allow-Origin': '*',
 
 # disable check on the export_dir, since the WebUI exports in a tmpdir
 oqvalidation.OqParam.is_valid_export_dir = lambda self: True
+
+running_pids = []  # global list of running job PIDs
+
+
+@atexit.register
+def kill_running_jobs():
+    """Kill the running jobs, if any"""
+    for pid in running_pids:
+        logging.info('killing %d', pid)
+        os.kill(pid, signal.SIGTERM)
 
 
 # Credit for this decorator to https://gist.github.com/aschem/1308865.
@@ -428,7 +439,7 @@ def run_calc(request):
 
     user = utils.get_user_data(request)
     try:
-        job_id, _pid = submit_job(einfo[0], user['name'], hazard_job_id)
+        job_id = submit_job(einfo[0], user['name'], hazard_job_id)
     except Exception as exc:  # no job created, for instance missing .xml file
         # get the exception message
         exc_msg = str(exc)
@@ -467,8 +478,13 @@ def submit_job(job_ini, user_name, hazard_job_id=None):
     devnull = getattr(subprocess, 'DEVNULL', None)  # defined in Python 3
     popen = subprocess.Popen([sys.executable, tmp_py],
                              stdin=devnull, stdout=devnull, stderr=devnull)
-    threading.Thread(target=popen.wait).start()
-    return job_id, popen.pid
+    running_pids.append(popen.pid)
+
+    def wait():
+        popen.wait()
+        running_pids.remove(popen.pid)
+    threading.Thread(target=wait).start()
+    return job_id
 
 
 @require_http_methods(['GET'])
