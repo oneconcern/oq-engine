@@ -183,7 +183,7 @@ def disagg_matrix(mag_bins, dist_bins, lon_bins, lat_bins, eps_bins,
     dim3 = len(lon_bins) - 1
     dim4 = len(lat_bins) - 1
     shape = (dim1, dim2, dim3, dim4, len(eps_bins) - 1, len(trt_bins))
-    return numpy.ones(shape)
+    return numpy.zeros(shape)
 
 
 def _arrange_data_in_bins(bins_data, bin_edges):
@@ -191,13 +191,13 @@ def _arrange_data_in_bins(bins_data, bin_edges):
     Given bins data, as it comes from :func:`collect_bins_data`, and bin edges
     from :func:`_define_bins`, create a normalized 6d disaggregation matrix.
     """
-    mags, dists, lons, lats, pnes, trti = bins_data
-    mag_bins, dist_bins, lon_bins, lat_bins, eps_bins, trt_bins = bin_edges
+    mags, dists, lons, lats, pnes = bins_data
+    mag_bins, dist_bins, lon_bins, lat_bins, eps_bins = bin_edges
     dim1 = len(mag_bins) - 1
     dim2 = len(dist_bins) - 1
     dim3 = len(lon_bins) - 1
     dim4 = len(lat_bins) - 1
-    diss_matrix = disagg_matrix(*bin_edges)
+    diss_matrix = disagg_matrix(*bin_edges) + 1
 
     # find bin indexes of rupture attributes; bins are assumed closed
     # on the lower bound, and open on the upper bound, that is [ )
@@ -221,7 +221,7 @@ def _arrange_data_in_bins(bins_data, bin_edges):
 
     for i, (i_mag, i_dist, i_lon, i_lat) in enumerate(
             zip(mags_idx, dists_idx, lons_idx, lats_idx)):
-        diss_matrix[i_mag, i_dist, i_lon, i_lat, :, trti] *= pnes[i, :]
+        diss_matrix[i_mag, i_dist, i_lon, i_lat, :, 0] *= pnes[i, :]
 
     return 1 - diss_matrix
 
@@ -346,8 +346,10 @@ def disaggregation(
     bin_edges = _define_bins(
         mags, dists, lons, lats, mag_bin_width, dist_bin_width,
         coord_bin_width, truncation_level, n_epsilons) + (sorted(trt_num),)
-    diss_matrix = _arrange_data_in_bins(
-        [mags, dists, lons, lats, eps, range(len(trts))], bin_edges)
+    diss_matrix = disagg_matrix(*bin_edges)
+    for i, bd in enumerate(bdata):
+        diss_matrix[..., i] = _arrange_data_in_bins(
+            [mags, dists, lons, lats, eps], bin_edges[:-1])[..., 0]
     return bin_edges, diss_matrix
 
 

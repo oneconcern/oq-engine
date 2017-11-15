@@ -24,7 +24,6 @@ import math
 import logging
 import numpy
 
-from openquake.baselib import hdf5
 from openquake.baselib.general import split_in_blocks
 from openquake.hazardlib.calc import disagg
 from openquake.hazardlib.calc.filters import SourceFilter
@@ -66,7 +65,6 @@ def compute_disagg(src_filter, sources, cmaker, quartets, imls,
     """
     sitecol = src_filter.sitecol
     arranging_mon = monitor('arranging bins')
-    trti = trt_names.index(sources[0].tectonic_region_type)
 
     # collect bins data
     with monitor('collecting bins'):
@@ -77,12 +75,12 @@ def compute_disagg(src_filter, sources, cmaker, quartets, imls,
     if len(bd.mags) == 0:  # all filtered out
         return {}
 
-    result = {}  # sid, rlz.id, poe, imt, iml, trt_names -> array
+    result = {}  # sid, rlz.id, poe, imt, iml -> array
     for i, site in enumerate(sitecol):
         sid = sitecol.sids[i]
         # edges as wanted by disagg._arrange_data_in_bins
         try:
-            edges = bin_edges[sid] + (trt_names,)
+            edges = bin_edges[sid]
         except KeyError:
             # bin_edges for a given site are missing if the site is far away
             continue
@@ -92,8 +90,7 @@ def compute_disagg(src_filter, sources, cmaker, quartets, imls,
         # extract the probabilities of non-exceedance for the
         # given realization, disaggregation PoE, and IMT
         # bins in a format handy for hazardlib
-        bdata = [bd.mags, bd.dists[:, i], bd.lons[:, i], bd.lats[:, i],
-                 None, trti]
+        bdata = [bd.mags, bd.dists[:, i], bd.lons[:, i], bd.lats[:, i], None]
         cache = {}  # used if iml_disagg is given
         for q, pnes in enumerate(bd.eps.transpose(1, 0, 2, 3)):
             poe, _gsim, imt, rlzi = quartets[q]
