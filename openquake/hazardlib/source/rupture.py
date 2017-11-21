@@ -24,6 +24,7 @@ import abc
 import numpy
 import math
 import itertools
+import cPickle as pickle
 from openquake.baselib import general
 from openquake.baselib.slots import with_slots
 from openquake.baselib.python3compat import with_metaclass
@@ -600,6 +601,7 @@ class EBRupture(object):
         attributes set, suitable for export in XML format.
         """
         rupture = self.rupture
+        pickle.dump(rupture, open('rupture_' + str(self.serial) + '.p', 'wb'))
         events_by_ses = general.group_array(self.events, 'ses')
         new = ExportedRupture(self.serial, events_by_ses, self.sids)
         new.mesh = mesh[self.sids]

@@ -27,6 +27,7 @@ import tempfile
 import collections
 import numpy
 from shapely import wkt, geometry
+import cPickle as pickle
 
 from openquake.baselib.general import groupby, AccumDict, DictArray, deprecated
 from openquake.baselib.python3compat import configparser, decode
@@ -205,10 +206,7 @@ def get_mesh(oqparam):
             data = []
             for i, line in enumerate(csv_data[1:]):
                 row = line.replace(',', ' ').split()
-                sid = row[0]
-                if sid != str(i):
-                    raise InvalidFile('%s: expected site_id=%d, got %s' % (
-                        oqparam.inputs['sites'], i, sid))
+                assert int(row[0]) == i, (row[0], i)
                 data.append(' '.join(row[1:]))
         elif oqparam.calculation_mode == 'gmf_ebrisk':
             raise InvalidFile('Missing header in %(sites)s' % oqparam.inputs)
@@ -355,12 +353,15 @@ def get_rupture_sitecol(oqparam, sitecol):
         a pair (EBRupture, FilteredSiteCollection)
     """
     rup_model = oqparam.inputs['rupture_model']
-    [rup_node] = nrml.read(rup_model)
-    conv = sourceconverter.RuptureConverter(
-        oqparam.rupture_mesh_spacing, oqparam.complex_fault_mesh_spacing)
-    rup = conv.convert_node(rup_node)
-    rup.tectonic_region_type = '*'  # there is not TRT for scenario ruptures
-    rup.seed = oqparam.random_seed
+    if rup_model.endswith('.p'):
+        rup = pickle.load(open(rup_model, 'rb'))
+    else:
+        [rup_node] = nrml.read(rup_model)
+        conv = sourceconverter.RuptureConverter(
+            oqparam.rupture_mesh_spacing, oqparam.complex_fault_mesh_spacing)
+        rup = conv.convert_node(rup_node)
+        rup.tectonic_region_type = '*'  # there is not TRT for scenario ruptures
+        rup.seed = oqparam.random_seed
     maxdist = oqparam.maximum_distance['default']
     sc = calc.filters.filter_sites_by_distance_to_rupture(
         rup, maxdist, sitecol)
