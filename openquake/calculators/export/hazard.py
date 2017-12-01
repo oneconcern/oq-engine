@@ -23,6 +23,7 @@ import operator
 import collections
 
 import numpy
+import cPickle as pickle
 
 from openquake.baselib.general import humansize, group_array, DictArray
 from openquake.hazardlib import valid
@@ -81,6 +82,9 @@ def export_ruptures_xml(ekey, dstore):
         ruptures[grp_id] = []
         for ebr in calc.get_ruptures(dstore, events, grp_id):
             ruptures[grp_id].append(ebr.export(mesh, sm_by_grp))
+            rupFileLoc = os.path.join(oq.base_path, oq.export_dir, 'rupture_' +
+                                      str(ebr.serial) + '_' + str(dstore.calc_id) + '.p')
+            pickle.dump(ebr.rupture, open(rupFileLoc, 'wb'))
     dest = dstore.export_path('ses.' + fmt)
     writer = hazard_writers.SESXMLWriter(dest)
     writer.serialize(ruptures, oq.investigation_time)
@@ -671,6 +675,8 @@ def export_gmf_xml(key, dest, sitecol, imts, ruptures, rlz,
 def export_gmf_data_csv(ekey, dstore):
     oq = dstore['oqparam']
     rlzs_assoc = dstore['csm_info'].get_rlzs_assoc()
+    gsimFileLoc = os.path.join(oq.base_path, oq.export_dir, 'realizations_trt' '_' + str(dstore.calc_id) + '.p')
+    pickle.dump(rlzs_assoc.gsim_by_trt, open(gsimFileLoc, 'wb'))
     imts = list(oq.imtls)
     sitemesh = get_mesh(dstore['sitecol'])
     eid = int(ekey[0].split('/')[1]) if '/' in ekey[0] else None
