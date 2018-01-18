@@ -3,6 +3,9 @@
 #
 # see: dh_installdeb(1)
 
+# [zivagolee]: We do not need this yet so disabling postinst for now
+exit 0
+
 if [ $GEM_SET_DEBUG ]; then
     set -x
 fi

@@ -1,3 +1,9 @@
+python-oq-engine (2.8.1-0~trusty01) trusty; urgency=low
+
+  * Fixed debian/changelog and updated version
+
+python-oq-engine (2.8.0-0~trusty01) trusty; urgency=low
+
   [Michele Simionato]
   * Better error message if the user sets a wrong site_id in the sites.csv file
   * Now the distance and lon lat bins for disaggregation are built directly

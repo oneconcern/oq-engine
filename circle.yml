@@ -1,0 +1,20 @@
+machine:
+  python:
+    version: 2.7.6
+dependencies:
+  pre:
+    - ./deploy/install_deps.sh
+  cache_directories:
+    - ~/downloads
+test:
+  override:
+    - echo "test"
+deployment:
+  develop:
+    branch: develop
+    commands:
+      - ./deploy/build_packages.sh
+  master:
+    branch: master
+    commands:
+      - ./deploy/build_packages.sh
