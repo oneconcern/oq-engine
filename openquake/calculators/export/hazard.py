@@ -82,7 +82,10 @@ def export_ruptures_xml(ekey, dstore):
         ruptures[grp_id] = []
         for ebr in calc.get_ruptures(dstore, events, grp_id):
             ruptures[grp_id].append(ebr.export(mesh, sm_by_grp))
-            rupFileLoc = os.path.join(oq.base_path, oq.export_dir, 'rupture_' +
+            ruptures_dir = os.path.join(oq.base_path, oq.export_dir, 'ruptures')
+            if not os.path.exists(ruptures_dir):
+              os.makedirs(ruptures_dir)
+            rupFileLoc = os.path.join(ruptures_dir, 'rupture_' +
                                       str(ebr.serial) + '_' + str(dstore.calc_id) + '.p')
             pickle.dump(ebr.rupture, open(rupFileLoc, 'wb'))
     dest = dstore.export_path('ses.' + fmt)
