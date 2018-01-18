@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-apt-get update && apt-get install -y \
+sudo apt-get update && apt-get install -y \
   python \
   python-pip \
   software-properties-common \
@@ -12,8 +12,8 @@ apt-get update && apt-get install -y \
   zip \
   wget
 
-add-apt-repository -y ppa:openquake/ppa
+sudo add-apt-repository -y ppa:openquake/ppa
 
-apt-get update && apt-get install -y \
+sudo apt-get update && apt-get install -y \
   python-oq-libs-extra \
   python-oq-libs
