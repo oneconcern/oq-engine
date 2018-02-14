@@ -136,6 +136,8 @@ class JB2009CorrelationModel(BaseCorrelationModel):
         """
         if isinstance(imt, SA):
             period = imt.period
+        elif isinstance(imt, PGV):  # changed by Abhineet Gupta to include PGV based on the paper
+            period = 1
         else:
             assert isinstance(imt, PGA), imt
             period = 0
