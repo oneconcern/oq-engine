@@ -20,7 +20,7 @@ spatially-distributed ground-shaking intensities.
 import abc
 import numpy
 
-from openquake.hazardlib.imt import SA, PGA
+from openquake.hazardlib.imt import SA, PGA, PGV
 from openquake.baselib.python3compat import with_metaclass
 
 
